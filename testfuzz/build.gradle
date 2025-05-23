@@ -38,6 +38,10 @@ dependencies {
   implementation project(':evm')
   implementation project(':util')
 
+  implementation project(':ethereum:core')
+  implementation project(':ethereum:rlp')
+  implementation project(':plugin-api')
+
   implementation 'com.fasterxml.jackson.core:jackson-databind'
   implementation 'com.google.guava:guava'
   implementation 'info.picocli:picocli'
@@ -64,18 +68,18 @@ tasks.register("runFuzzer", JavaExec) {
   args = [
     "eof-container",
     "--tests-dir=${projectDir}/../ethereum/referencetests/src/reference-test/external-resources/EOFTests",
-    "--corpus-dir=${corpusDir}"
+    //"--corpus-dir=${corpusDir}"
   ]
-  doFirst {
-    mkdir corpusDir
-  }
+  //doFirst {
+  //  mkdir corpusDir
+  //}
 }
 
 // Adds guidance to the fuzzer but with a 90% performance drop.
 tasks.register("fuzzGuided") {
   doLast {
     runFuzzer.args += "--guidance-regexp=org/(hyperledger/besu|apache/tuweni)"
-    runFuzzer.args += "--new-corpus-dir=${corpusDir}/.."
+    //runFuzzer.args += "--new-corpus-dir=${corpusDir}/.."
   }
   finalizedBy("runFuzzer")
 }

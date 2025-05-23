@@ -23,6 +23,8 @@ import org.hyperledger.besu.evm.EVM;
 import org.hyperledger.besu.evm.MainnetEVMs;
 import org.hyperledger.besu.evm.internal.EvmConfiguration;
 import org.hyperledger.besu.testfuzz.javafuzz.Fuzzer;
+import org.hyperledger.besu.ethereum.core.encoding.EncodingContext;
+import org.hyperledger.besu.ethereum.core.encoding.TransactionDecoder;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -180,13 +182,14 @@ public class EofContainerSubCommand implements Runnable {
     if (!noLocalClient) {
       fuzzingClients.add(new InternalClient("this"));
     }
-    clients.forEach((k, v) -> fuzzingClients.add(new StreamingClient(k, v.split(" "))));
+//    clients.forEach((k, v) -> fuzzingClients.add(new StreamingClient(k, v.split(" "))));
     System.out.println("Fuzzing client set: " + clients.keySet());
 
     try {
       new Fuzzer(
-              this::parseEOFContainers,
-              corpusDir.toString(),
+              this::parseTx,
+//              corpusDir.toString(),
+              "/home/user/workspace/besu/testfuzz/corpus/",
               this::fuzzStats,
               guidanceRegexp,
               newCorpusDir)
@@ -289,4 +292,15 @@ public class EofContainerSubCommand implements Runnable {
     return " / %5.2f%% valid %d/%d"
         .formatted((100.0 * validContainers) / totalContainers, validContainers, totalContainers);
   }
+
+  void parseTx(final byte[] bytes){
+    Bytes txUnderTest = Bytes.wrap(bytes);
+    try {
+      var transaction = TransactionDecoder.decodeOpaqueBytes(txUnderTest, EncodingContext.BLOCK_BODY);
+      transaction.getSender();
+    } catch (Exception ex) {
+      //(ex.getMessage());
+    }
+  }
+
 }
